@@ -1,0 +1,12 @@
+[Unit]
+Description=url shortener on uvicorn
+After=network-online.target
+
+[Service]
+User=winslinn
+WorkingDirectory=/opt/shortit
+ExecStart=/opt/shortit/.venv/bin/uvicorn shortit.main:app --app-dir /opt/shortit/src --host 127.0.0.1 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
