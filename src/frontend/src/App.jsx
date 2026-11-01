@@ -22,7 +22,7 @@ function App() {
     setResult({ ...initialState, status: 'loading' })
 
     try {
-      const response = await fetch('/shorten', {
+      const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,9 +68,6 @@ function App() {
             />
             <img src="/brand/short-it-horizontal.svg" alt="Short it" />
           </picture>
-        </a>
-        <a className="topbar-link" href="#shortener">
-          Shorten a URL
         </a>
       </header>
 

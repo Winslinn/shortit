@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/shorten': 'http://127.0.0.1:8000',
+      '/api/shorten': 'http://127.0.0.1:8000',
     },
   },
 })
