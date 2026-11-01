@@ -46,7 +46,7 @@ def redirect_url(code: str, session: Session = Depends(get_session)):
         status_code=302
     )
 
-@app.post("/shorten")
+@app.post("/api/shorten")
 def shorten_url(data: ShortenRequest, session: Session = Depends(get_session)):
     code = ''.join(choice(alphabet) for _ in range(8))
     link = Address(id=code, url=str(data.url))
