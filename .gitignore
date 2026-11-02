@@ -11,3 +11,4 @@ wheels/
 
 # Sensitive files
 *.db
+*.env
