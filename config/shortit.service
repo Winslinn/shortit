@@ -5,7 +5,10 @@ After=network-online.target
 [Service]
 User=winslinn
 WorkingDirectory=/opt/shortit
-ExecStart=/opt/shortit/.venv/bin/uvicorn shortit.main:app --app-dir /opt/shortit/src --host 127.0.0.1 --port 8000
+EnvironmentFile=-/etc/shortit/turnstile.env
+Environment=TURNSTILE_HOSTNAMES=winslinn.dpdns.org
+ExecStart=/opt/shortit/.venv/bin/uvicorn shortit.main:app --app-dir /opt/shortit/src \
+ --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always
 
 [Install]
