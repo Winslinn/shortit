@@ -90,7 +90,7 @@ function App() {
     let shortened = false
 
     try {
-      const response = await fetch('/api/shorten', {
+      const response = await fetch('/links/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,9 +107,13 @@ function App() {
         throw new Error(data.detail || 'Could not shorten this link.')
       }
 
+      if (typeof data.id !== 'string' || !data.id) {
+        throw new Error('The server returned an invalid shortened link.')
+      }
+
       setResult({
         status: 'success',
-        shortUrl: data.short_url,
+        shortUrl: new URL(`/s/${encodeURIComponent(data.id)}`, window.location.origin).href,
         error: '',
       })
       shortened = true
