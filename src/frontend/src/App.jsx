@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 
-const turnstileSiteKey = '0x4AAAAAAFww43GtJVl5TVWE'
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAFww43GtJVl5TVWE'
 let turnstileScriptPromise
 
 function loadTurnstile() {
