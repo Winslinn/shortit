@@ -6,8 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/links': 'http://127.0.0.1:8000',
-      '/s': 'http://127.0.0.1:8000',
+      '/links/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
+      '/s/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
+      '/users/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
     },
   },
 })

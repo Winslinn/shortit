@@ -8,13 +8,21 @@ from fastapi import HTTPException
 
 
 def verify_turnstile_token(token: str, remote_ip: str | None) -> bool:
-    secret = os.getenv("TURNSTILE_SECRET", "").strip()
+    test_mode = os.getenv("TURNSTILE_TEST_MODE", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    secret = os.getenv(
+        "TURNSTILE_TEST_SECRET" if test_mode else "TURNSTILE_SECRET",
+        "",
+    ).strip()
     expected_hostnames = {
         hostname.strip().lower().rstrip(".")
         for hostname in os.getenv("TURNSTILE_HOSTNAMES", "").split(",")
         if hostname.strip()
     }
-    if not secret or not expected_hostnames:
+    if not secret or (not expected_hostnames and not test_mode):
         raise HTTPException(
             status_code=503,
             detail="Link shortening is temporarily unavailable.",
@@ -39,6 +47,12 @@ def verify_turnstile_token(token: str, remote_ip: str | None) -> bool:
 
     if not isinstance(result, dict):
         return False
+
+    # Cloudflare's test secret returns example.com and no action field.
+    # Test mode is enabled only in the development Compose service.
+    if test_mode:
+        return result.get("success") is True
+
     hostname = str(result.get("hostname", "")).lower().rstrip(".")
     return (
         result.get("success") is True

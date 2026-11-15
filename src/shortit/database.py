@@ -1,10 +1,13 @@
 import asyncio
+import os
 
 from sqlalchemy import ForeignKey, Integer, create_engine, inspect, select, update
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm import Mapped, mapped_column
 
-engine = create_engine("sqlite:///shortit.db", connect_args={"check_same_thread": False})
+database_url = os.getenv("DATABASE_URL", "sqlite:///shortit.db")
+engine_options = {"connect_args": {"check_same_thread": False}} if database_url.startswith("sqlite:") else {}
+engine = create_engine(database_url, **engine_options)
 
 class Base(DeclarativeBase):
     pass
