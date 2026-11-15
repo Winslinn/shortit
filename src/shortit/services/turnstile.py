@@ -14,7 +14,7 @@ def verify_turnstile_token(token: str, remote_ip: str | None) -> bool:
         "yes",
     }
     secret = os.getenv(
-        "VITE_TURNSTILE_SITE_KEY" if test_mode else "TURNSTILE_SECRET",
+        "TURNSTILE_TEST_SECRET" if test_mode else "TURNSTILE_SECRET",
         "",
     ).strip()
     expected_hostnames = {

@@ -11,6 +11,7 @@ services:
       DATABASE_URL: sqlite:////data/shortit.db
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-this-value}
       TURNSTILE_TEST_MODE: "true"
+      TURNSTILE_TEST_SECRET: 1x0000000000000000000000000000000AA
     ports:
       - "${SHORTIT_BIND_ADDRESS:-127.0.0.1}:18000:8000"
     volumes:
