@@ -25,7 +25,6 @@ class LoginRequest(BaseModel):
     email: str
     password: SecretStr
 
-
 class UserRead(BaseModel):
     id: int
     email: str
