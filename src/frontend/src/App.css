@@ -89,8 +89,10 @@ h1 {
   max-width: 12ch;
   margin-bottom: 24px;
   color: var(--text);
+  font-family: var(--display);
   font-size: 6rem;
-  line-height: 0.92;
+  font-weight: 700;
+  line-height: 0.98;
   letter-spacing: 0;
 }
 
@@ -105,10 +107,8 @@ h1 {
   display: grid;
   gap: 16px;
   padding: clamp(22px, 4vw, 32px);
-  border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: var(--shadow);
 }
 
 .shortener label {
