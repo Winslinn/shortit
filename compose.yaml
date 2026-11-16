@@ -4,12 +4,15 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
+      - /etc/shortit/shortit.env
       - /etc/shortit/google_cloud.env
       - /etc/shortit/turnstile.env
     environment:
       APP_HOSTNAME: localhost
       DATABASE_URL: sqlite:////data/shortit.db
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-this-value}
+      REFRESH_COOKIE_SECURE: ${REFRESH_COOKIE_SECURE:-false}
+      REDIS_URL: redis://redis:6379/0
       TURNSTILE_TEST_MODE: "true"
       TURNSTILE_TEST_SECRET: 1x0000000000000000000000000000000AA
     ports:
@@ -17,6 +20,17 @@ services:
     volumes:
       - ./src:/app/src
       - shortit_data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   frontend:
     build:
