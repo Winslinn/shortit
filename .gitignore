@@ -5,9 +5,12 @@ build/
 dist/
 wheels/
 *.egg-info
+test*.py
 
-# Virtual environments
+# Virtual environments & modules
 .venv
+node_modules
 
 # Sensitive files
 *.db
+*.env

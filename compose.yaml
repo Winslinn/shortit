@@ -1,0 +1,53 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - /etc/shortit/shortit.env
+      - /etc/shortit/google_cloud.env
+      - /etc/shortit/turnstile.env
+    environment:
+      APP_HOSTNAME: localhost
+      DATABASE_URL: sqlite:////data/shortit.db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-this-value}
+      REFRESH_COOKIE_SECURE: ${REFRESH_COOKIE_SECURE:-false}
+      REDIS_URL: redis://redis:6379/0
+      TURNSTILE_TEST_MODE: "true"
+      TURNSTILE_TEST_SECRET: 1x0000000000000000000000000000000AA
+    ports:
+      - "${SHORTIT_BIND_ADDRESS:-127.0.0.1}:18000:8000"
+    volumes:
+      - ./src:/app/src
+      - shortit_data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/Dockerfile.dev
+    working_dir: /app/frontend
+    environment:
+      VITE_API_PROXY_TARGET: http://api:8000
+      VITE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+    depends_on:
+      - api
+    ports:
+      - "${SHORTIT_BIND_ADDRESS:-127.0.0.1}:15173:5173"
+    volumes:
+      - ./src/frontend:/app/frontend
+      - frontend_node_modules:/app/frontend/node_modules
+
+volumes:
+  frontend_node_modules:
+  shortit_data:

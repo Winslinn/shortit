@@ -1,20 +1,17 @@
-import string
+from fastapi import FastAPI
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
-from shortit.database import Base, engine, get_session, Address
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
-from fastapi import HTTPException
-from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, HttpUrl
-from secrets import choice
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-alphabet = string.ascii_letters + string.digits
+from shortit.database import initialize_database
+from shortit.limiter import limiter
+from shortit.routers.links import router as links_router
+from shortit.routers.users import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(engine)
+    initialize_database()
     yield
 
 app = FastAPI(
@@ -24,32 +21,7 @@ app = FastAPI(
     openapi_url=None,    
 )
 
-class ShortenRequest(BaseModel):
-    url: HttpUrl
-
-@app.get("/")
-async def read_root():
-    return {"message": "Congratulations, you've found the most boring endpoint on the internet"}
-
-@app.get("/s/{code}")
-def redirect_url(code: str, session: Session = Depends(get_session)):
-    address = session.scalars(select(Address).where(Address.id == code)).first()
-
-    if address is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Short URL not found"
-        )
-
-    return RedirectResponse(
-        url=address.url,
-        status_code=302
-    )
-
-@app.post("/api/shorten")
-def shorten_url(data: ShortenRequest, session: Session = Depends(get_session)):
-    code = ''.join(choice(alphabet) for _ in range(8))
-    link = Address(id=code, url=str(data.url))
-    session.add(link)
-    session.commit()
-    return {"short_url": f"https://winslinn.dpdns.org/s/{code}"}
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.include_router(links_router)
+app.include_router(users_router)

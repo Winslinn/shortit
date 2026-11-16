@@ -6,7 +6,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/shorten': 'http://127.0.0.1:8000',
+      '/links/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
+      '/s/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
+      '/users/': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
+    },
+    fs: {
+      allow: ['../..'],
     },
   },
 })

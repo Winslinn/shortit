@@ -10,6 +10,14 @@
 
 :80 {
 	encode gzip
+
+	handle /users/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	handle /links/* {
+		reverse_proxy 127.0.0.1:8000
+	}
 	
 	handle /api/* {
 		reverse_proxy 127.0.0.1:8000
