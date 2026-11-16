@@ -10,7 +10,6 @@ from fastapi.responses import RedirectResponse
 
 from shortit.database import db
 from shortit.dependencies import get_current_user
-from shortit.limiter import limiter
 from shortit.schemas import Link, LinkCreate
 from shortit.services.safe_browsing import check_url_safety
 from shortit.services.turnstile import verify_turnstile_token
@@ -59,7 +58,6 @@ async def list_for_user(user_id: int) -> list[Link]:
 
 
 @router.post("/links/")
-@limiter.limit("5/month")
 async def create_link(
     request: Request,
     data: LinkCreate,

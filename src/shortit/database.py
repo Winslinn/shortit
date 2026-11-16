@@ -36,6 +36,23 @@ class User(Base):
     def __repr__(self) -> str:
         return f"User(id={self.id}, email={self.email!r})"
 
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    token_hash: Mapped[str] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    expires_at: Mapped[str] = mapped_column(nullable=False, index=True)
+    family_id: Mapped[str | None] = mapped_column(nullable=True, index=True)
+    revoked_at: Mapped[str | None] = mapped_column(nullable=True)
+    reuse_detected_at: Mapped[str | None] = mapped_column(nullable=True, index=True)
+
+    def __repr__(self) -> str:
+        return f"RefreshToken(user_id={self.user_id}, expires_at={self.expires_at!r})"
+
 class Address(Base):
     __tablename__ = "address"
 
@@ -58,18 +75,43 @@ def get_session():
 def initialize_database() -> None:
     Base.metadata.create_all(engine)
 
-    if "address" not in inspect(engine).get_table_names():
-        return
-
-    columns = {column["name"] for column in inspect(engine).get_columns("address")}
+    tables = set(inspect(engine).get_table_names())
     with engine.begin() as connection:
-        if "user_id" not in columns:
+        if "address" in tables:
+            address_columns = {
+                column["name"] for column in inspect(engine).get_columns("address")
+            }
+            if "user_id" not in address_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE address ADD COLUMN user_id INTEGER REFERENCES users(id)"
+                )
+            if "clicks" not in address_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE address ADD COLUMN clicks INTEGER NOT NULL DEFAULT 0"
+                )
+
+        if "refresh_tokens" in tables:
+            refresh_columns = {
+                column["name"]
+                for column in inspect(engine).get_columns("refresh_tokens")
+            }
+            for column in ("family_id", "revoked_at", "reuse_detected_at"):
+                if column not in refresh_columns:
+                    connection.exec_driver_sql(
+                        f"ALTER TABLE refresh_tokens ADD COLUMN {column} VARCHAR"
+                    )
+
+            # Keep legacy tokens independently revocable when their family is unknown.
             connection.exec_driver_sql(
-                "ALTER TABLE address ADD COLUMN user_id INTEGER REFERENCES users(id)"
+                "UPDATE refresh_tokens SET family_id = token_hash WHERE family_id IS NULL"
             )
-        if "clicks" not in columns:
             connection.exec_driver_sql(
-                "ALTER TABLE address ADD COLUMN clicks INTEGER NOT NULL DEFAULT 0"
+                "CREATE INDEX IF NOT EXISTS ix_refresh_tokens_family_id "
+                "ON refresh_tokens (family_id)"
+            )
+            connection.exec_driver_sql(
+                "CREATE INDEX IF NOT EXISTS ix_refresh_tokens_reuse_detected_at "
+                "ON refresh_tokens (reuse_detected_at)"
             )
 
 class Database:
