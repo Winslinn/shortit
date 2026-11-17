@@ -1,11 +1,11 @@
-# Shortit
+# Short It
 
 [![Shortit](https://img.shields.io/badge/Shortit-URL%20shortener-F28B30?style=flat-square&logo=chainlink&logoColor=white)](http://winslinn.dpdns.org)
 [![Powered by FastAPI](https://img.shields.io/badge/Powered%20by-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 
 ## Project Overview
 
-Shortit turns long URLs into short links that redirect to the original destination. Users create links from the web app after signing in and completing a security check.
+Short It turns long URLs into short links that redirect to the original destination. Users create links from the web app after signing in and completing a security check.
 
 ## Features
 
